@@ -6,6 +6,7 @@ import lombok.Getter;
 public enum AuthorizationStatus {
 
     WAITING_FOR_AUTHORIZATION,
-    AUTHORIZED
+    AUTHORIZED,
+    REJECTED
 
 }

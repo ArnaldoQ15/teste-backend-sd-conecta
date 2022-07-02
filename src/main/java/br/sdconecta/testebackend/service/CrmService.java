@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-import static br.sdconecta.testebackend.util.ExceptionMessages.CRM_NOT_FOUND;
+import static br.sdconecta.testebackend.util.Constants.*;
 
 @Service
 public class CrmService {
@@ -40,6 +40,12 @@ public class CrmService {
 
     public ResponseEntity<Page<CrmOutDto>> findAll(ParameterFind parameterFind) {
         Page<Crm> crmEntities = getPageCrm(parameterFind);
+        Page<CrmOutDto> crmFinalList = crmEntities.map(crm -> modelMapper.map(crm, CrmOutDto.class));
+        return ResponseEntity.ok(crmFinalList);
+    }
+
+    public ResponseEntity<Page<CrmOutDto>> findAllById(ParameterFind parameterFind, Long userId) {
+        Page<Crm> crmEntities = getPageCrmById(parameterFind, userId);
         Page<CrmOutDto> crmFinalList = crmEntities.map(crm -> modelMapper.map(crm, CrmOutDto.class));
         return ResponseEntity.ok(crmFinalList);
     }
@@ -69,7 +75,8 @@ public class CrmService {
 
     private Crm findCrm(Long crmId) {
         Optional<Crm> crm = repository.findById(crmId);
-        if (crm.isEmpty()) throw new NotFoundException(CRM_NOT_FOUND);
+        if (crm.isEmpty())
+            throw new NotFoundException(CRM_NOT_FOUND);
         return crm.get();
     }
 
@@ -78,6 +85,16 @@ public class CrmService {
         if (parameterFind.getSpecialty() != null || (Objects.nonNull(parameterFind.getSpecialty()) && !parameterFind.getSpecialty().isBlank()))
             return repository.findBySpecialty(parameterFind.getSpecialty().toLowerCase(Locale.ROOT), pageRequest);
         return repository.findAll(pageRequest);
+    }
+
+    public Page<Crm> getPageCrmById(ParameterFind parameterFind, Long userId) {
+        parameterFind.setPage(Objects.isNull(parameterFind.getPage()) ? PAGE_PAGE : parameterFind.getPage());
+        parameterFind.setSize(Objects.isNull(parameterFind.getSize()) ? PAGE_SIZE : parameterFind.getSize());
+
+        Pageable pageRequest = PageRequest.of(parameterFind.getPage(), parameterFind.getSize(), Sort.by("specialty").ascending());
+        if (parameterFind.getSpecialty() != null || (Objects.nonNull(parameterFind.getSpecialty()) && !parameterFind.getSpecialty().isBlank()))
+            return repository.findBySpecialtyAndUserId(parameterFind.getSpecialty().toLowerCase(Locale.ROOT), userId, pageRequest);
+        return repository.findByUser_Id(userId, pageRequest);
     }
 
 }

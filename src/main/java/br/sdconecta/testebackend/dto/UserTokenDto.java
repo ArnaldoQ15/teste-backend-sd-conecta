@@ -7,21 +7,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
-import java.util.List;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserOutDto {
+public class UserTokenDto {
 
-    private Long userId;
-    private String name;
-    private String surname;
-    private String email;
-    private String mobilePhone;
-    private List<CrmOutDto> crms;
+    private String accessToken;
+    private String refreshToken;
     private AuthorizationStatus authorizationStatus;
-    private String profileType;
+    private OffsetDateTime expiration;
 
 }

@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 public class UserInDto {
 
-    private Long userId;
+    private Long userIdChange;
     private String name;
     private String surname;
     private String password;
@@ -24,5 +24,6 @@ public class UserInDto {
     private String email;
     private List<CrmInDto> crms = new ArrayList<>();
     private String mobilePhone;
+    private String profileType;
 
 }

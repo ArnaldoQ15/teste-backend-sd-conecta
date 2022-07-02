@@ -1,9 +1,6 @@
 package br.sdconecta.testebackend.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -12,6 +9,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "userSystem")
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class User {
@@ -30,14 +28,11 @@ public class User {
     @Column
     private String password;
 
-    @Column
+    @Column(unique = true)
     private String email;
 
     @Column
     private String mobilePhone;
-
-    @Column
-    private Boolean admin;
 
     @Column
     @Enumerated(EnumType.STRING)
@@ -46,5 +41,13 @@ public class User {
     @OneToMany(mappedBy = "crmId", cascade = CascadeType.ALL)
     @ToString.Exclude
     private List<Crm> crms = new ArrayList<>();
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    private ProfileType profileType;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "tokenId")
+    private UserToken token;
 
 }

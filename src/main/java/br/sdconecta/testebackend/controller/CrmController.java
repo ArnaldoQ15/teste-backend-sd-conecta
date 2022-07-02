@@ -4,6 +4,7 @@ import br.sdconecta.testebackend.dto.CrmInDto;
 import br.sdconecta.testebackend.dto.CrmOutDto;
 import br.sdconecta.testebackend.service.CrmService;
 import br.sdconecta.testebackend.util.ParameterFind;
+import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping("/crms")
+@RequestMapping("/crm")
 public class CrmController {
 
     @Autowired
@@ -28,19 +29,28 @@ public class CrmController {
         return service.findAll(parameterFind);
     }
 
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<Page<CrmOutDto>> findAllById(@RequestParam(value = "page") Integer page,
+                                                   @RequestParam(value = "size") Integer size,
+                                                   @RequestParam(value = "specialty", required = false) String specialty,
+                                                   @PathVariable Long userId) {
+        ParameterFind parameterFind = ParameterFind.builder().page(page).size(size).specialty(specialty).build();
+        return service.findAllById(parameterFind, userId);
+    }
+
     @GetMapping("/{crmId}")
-    public ResponseEntity<CrmOutDto> findId(@Valid @PathVariable Long crmId) {
+    public ResponseEntity<CrmOutDto> findId(@PathVariable Long crmId) {
         return service.findId(crmId);
     }
 
     @Transactional
     @PutMapping("/{crmId}/update")
-    public ResponseEntity<CrmOutDto> update(@Valid @PathVariable Long crmId, @RequestBody CrmInDto dto) {
+    public ResponseEntity<CrmOutDto> update(@PathVariable Long crmId, @RequestBody CrmInDto dto) {
         return service.update(crmId, dto);
     }
 
     @DeleteMapping("/{crmId}/delete")
-    public ResponseEntity<Void> delete(@Valid @PathVariable Long crmId) {
+    public ResponseEntity<Void> delete(@PathVariable Long crmId) {
         return service.delete(crmId);
     }
 

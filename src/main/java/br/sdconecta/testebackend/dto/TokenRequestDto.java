@@ -1,27 +1,22 @@
 package br.sdconecta.testebackend.dto;
 
-import br.sdconecta.testebackend.model.AuthorizationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserOutDto {
+public class TokenRequestDto {
 
-    private Long userId;
+    private String email;
     private String name;
     private String surname;
-    private String email;
+    private List<CrmRequestDto> crms;
     private String mobilePhone;
-    private List<CrmOutDto> crms;
-    private AuthorizationStatus authorizationStatus;
-    private String profileType;
 
 }

@@ -10,10 +10,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CrmInDto {
+public class CrmRequestDto {
 
-    private Long crmId;
-    private Long userId;
     private String crm;
     private FederativeUnit uf;
     private String specialty;
