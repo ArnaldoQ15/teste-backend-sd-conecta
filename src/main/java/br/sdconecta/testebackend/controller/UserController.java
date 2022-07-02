@@ -31,9 +31,9 @@ public class UserController {
         return service.persistCrm(userId, dto);
     }
 
-    @GetMapping
-    public ResponseEntity<Page<UserOutDto>> findAll(@RequestParam(value = "page") Integer page,
-                                                    @RequestParam(value = "size") Integer size,
+    @GetMapping("/user")
+    public ResponseEntity<Page<UserOutDto>> findAll(@RequestParam(value = "page", required = false) Integer page,
+                                                    @RequestParam(value = "size", required = false) Integer size,
                                                     @RequestParam(value = "name", required = false) String name) {
         ParameterFind parameterFind = ParameterFind.builder().page(page).size(size).name(name).build();
         return service.findAll(parameterFind);

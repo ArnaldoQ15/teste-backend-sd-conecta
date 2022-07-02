@@ -15,18 +15,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 import static br.sdconecta.testebackend.util.Constants.*;
-import static java.lang.Long.*;
+import static java.lang.Long.parseLong;
 import static java.time.OffsetDateTime.now;
-import static java.util.Objects.*;
+import static java.util.Objects.isNull;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Service
 public class TokenService {
@@ -37,7 +40,6 @@ public class TokenService {
     private ModelMapper modelMapper;
     @Value("${sdconecta.oauth2.url}")
     private String clientUrl;
-    private static final String BEARER = "Bearer ";
 
 
     @SneakyThrows
@@ -48,7 +50,7 @@ public class TokenService {
     }
 
     public Boolean validateBearerToken(String token) {
-        if (!token.startsWith(BEARER)) {
+        if (!token.startsWith(BEARER_TOKEN)) {
             throw new BadRequestException(INVALID_TOKEN);
         }
         return true;
@@ -81,11 +83,11 @@ public class TokenService {
     }
 
     private String generateTokenCompany(String authorization, TokenRequestDto userTokenRequest) {
-        authorization = authorization.replace(BEARER, "");
+        authorization = authorization.replace(BEARER_TOKEN, "");
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        headers.setContentType(APPLICATION_JSON);
+        headers.setAccept(Collections.singletonList(APPLICATION_JSON));
         headers.setBearerAuth(authorization);
         HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(getStringObjectMap(userTokenRequest), headers);
         ResponseEntity<String> response = restTemplate.postForEntity(clientUrl, httpEntity, String.class);
@@ -123,7 +125,7 @@ public class TokenService {
         token = token.replace("Bearer ", "");
         String expiration = decodeToken(token);
         long segundos = (parseLong(expiration.split("\"exp\":")[1].split(",")[0]) - parseLong(expiration.split("\"iat\":")[1].split(",")[0]));
-        return OffsetDateTime.now().plusSeconds(segundos);
+        return now().plusSeconds(segundos);
     }
 
 }

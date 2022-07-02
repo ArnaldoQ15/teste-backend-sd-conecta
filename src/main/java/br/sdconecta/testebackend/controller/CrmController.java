@@ -4,14 +4,11 @@ import br.sdconecta.testebackend.dto.CrmInDto;
 import br.sdconecta.testebackend.dto.CrmOutDto;
 import br.sdconecta.testebackend.service.CrmService;
 import br.sdconecta.testebackend.util.ParameterFind;
-import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/crm")
@@ -22,18 +19,18 @@ public class CrmController {
 
 
     @GetMapping
-    public ResponseEntity<Page<CrmOutDto>> findAll(@RequestParam(value = "page") Integer page,
-                                                   @RequestParam(value = "size") Integer size,
+    public ResponseEntity<Page<CrmOutDto>> findAll(@RequestParam(value = "page", required = false) Integer page,
+                                                   @RequestParam(value = "size", required = false) Integer size,
                                                    @RequestParam(value = "specialty", required = false) String specialty) {
         ParameterFind parameterFind = ParameterFind.builder().page(page).size(size).specialty(specialty).build();
         return service.findAll(parameterFind);
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<Page<CrmOutDto>> findAllById(@RequestParam(value = "page") Integer page,
-                                                   @RequestParam(value = "size") Integer size,
-                                                   @RequestParam(value = "specialty", required = false) String specialty,
-                                                   @PathVariable Long userId) {
+    public ResponseEntity<Page<CrmOutDto>> findAllById(@RequestParam(value = "page", required = false) Integer page,
+                                                       @RequestParam(value = "size", required = false) Integer size,
+                                                       @RequestParam(value = "specialty", required = false) String specialty,
+                                                       @PathVariable Long userId) {
         ParameterFind parameterFind = ParameterFind.builder().page(page).size(size).specialty(specialty).build();
         return service.findAllById(parameterFind, userId);
     }

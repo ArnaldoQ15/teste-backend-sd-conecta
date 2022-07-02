@@ -20,13 +20,13 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 import static br.sdconecta.testebackend.util.Constants.*;
+import static java.util.Objects.*;
 
 @Service
 public class CrmService {
 
     @Autowired
     private CrmRepository repository;
-
     @Autowired
     private ModelMapper modelMapper;
 
@@ -81,18 +81,21 @@ public class CrmService {
     }
 
     public Page<Crm> getPageCrm(ParameterFind parameterFind) {
-        Pageable pageRequest = PageRequest.of(parameterFind.getPage(), parameterFind.getSize(), Sort.by("specialty").ascending());
-        if (parameterFind.getSpecialty() != null || (Objects.nonNull(parameterFind.getSpecialty()) && !parameterFind.getSpecialty().isBlank()))
+        parameterFind.setPage(isNull(parameterFind.getPage()) ? PAGE_PAGE : parameterFind.getPage());
+        parameterFind.setSize(isNull(parameterFind.getSize()) ? PAGE_SIZE : parameterFind.getSize());
+
+        Pageable pageRequest = PageRequest.of(parameterFind.getPage(), parameterFind.getSize(), Sort.by("crmId").ascending());
+        if (nonNull(parameterFind.getSpecialty()) && !parameterFind.getSpecialty().isBlank())
             return repository.findBySpecialty(parameterFind.getSpecialty().toLowerCase(Locale.ROOT), pageRequest);
         return repository.findAll(pageRequest);
     }
 
     public Page<Crm> getPageCrmById(ParameterFind parameterFind, Long userId) {
-        parameterFind.setPage(Objects.isNull(parameterFind.getPage()) ? PAGE_PAGE : parameterFind.getPage());
-        parameterFind.setSize(Objects.isNull(parameterFind.getSize()) ? PAGE_SIZE : parameterFind.getSize());
+        parameterFind.setPage(isNull(parameterFind.getPage()) ? PAGE_PAGE : parameterFind.getPage());
+        parameterFind.setSize(isNull(parameterFind.getSize()) ? PAGE_SIZE : parameterFind.getSize());
 
-        Pageable pageRequest = PageRequest.of(parameterFind.getPage(), parameterFind.getSize(), Sort.by("specialty").ascending());
-        if (parameterFind.getSpecialty() != null || (Objects.nonNull(parameterFind.getSpecialty()) && !parameterFind.getSpecialty().isBlank()))
+        Pageable pageRequest = PageRequest.of(parameterFind.getPage(), parameterFind.getSize(), Sort.by("crmId").ascending());
+        if (nonNull(parameterFind.getSpecialty()) && !parameterFind.getSpecialty().isBlank())
             return repository.findBySpecialtyAndUserId(parameterFind.getSpecialty().toLowerCase(Locale.ROOT), userId, pageRequest);
         return repository.findByUser_Id(userId, pageRequest);
     }

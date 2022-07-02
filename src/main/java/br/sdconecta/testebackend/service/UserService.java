@@ -87,11 +87,8 @@ public class UserService {
 
     public ResponseEntity<Page<UserOutDto>> findAll(ParameterFind parameterFind) {
         Page<User> userEntities = getPageUser(parameterFind);
-        UserOutDto outDto = new UserOutDto();
-        Page<UserOutDto> userFinalList = userEntities.map(user -> {
-            modelMapper.map(user, outDto);
-            return outDto;
-        });
+
+        Page<UserOutDto> userFinalList = userEntities.map(user -> modelMapper.map(user, UserOutDto.class));
         return ResponseEntity.ok(userFinalList);
     }
 
