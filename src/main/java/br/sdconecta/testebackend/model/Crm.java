@@ -1,5 +1,6 @@
 package br.sdconecta.testebackend.model;
 
+import br.sdconecta.testebackend.enums.FederativeUnit;
 import lombok.*;
 
 import javax.persistence.*;

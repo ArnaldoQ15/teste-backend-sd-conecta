@@ -8,6 +8,7 @@ public class Constants {
     public static final String CRM_NOT_FOUND = "CRM not found.";
     public static final String WRONG_EMAIL_PASSWORD = "Wrong email or password.";
     public static final String INVALID_TOKEN = "Invalid token.";
+    public static final String OFFLINE_SYSTEM_SD_CONECTA = "Offline system.";
     public static final String ADMIN_ONLY = "Only admins can persist, change and delete doctors.";
     public static final String UNAUTHORIZED_TOKEN = "You don't have enough permissions.";
 

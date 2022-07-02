@@ -26,6 +26,12 @@ public class UserController {
     }
 
     @Transactional
+    @PostMapping("/user/new-admin")
+    public ResponseEntity<UserOutDto> persist(@RequestBody UserInDto dto) {
+        return service.persistAdmin(dto);
+    }
+
+    @Transactional
     @PostMapping("/user/{userId}/new-crm")
     public ResponseEntity<List<CrmOutDto>> persistCrm(@PathVariable Long userId, @RequestBody List<CrmInDto> dto) {
         return service.persistCrm(userId, dto);

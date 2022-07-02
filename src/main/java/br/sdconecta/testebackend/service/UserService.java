@@ -5,7 +5,6 @@ import br.sdconecta.testebackend.exception.BadRequestException;
 import br.sdconecta.testebackend.exception.NotFoundException;
 import br.sdconecta.testebackend.model.Crm;
 import br.sdconecta.testebackend.model.User;
-import br.sdconecta.testebackend.model.UserToken;
 import br.sdconecta.testebackend.repository.CrmRepository;
 import br.sdconecta.testebackend.repository.UserRepository;
 import br.sdconecta.testebackend.repository.UserTokenRepository;
@@ -22,9 +21,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-import static br.sdconecta.testebackend.model.AuthorizationStatus.*;
-import static br.sdconecta.testebackend.model.ProfileType.ADMIN;
-import static br.sdconecta.testebackend.model.ProfileType.NORMAL;
+import static br.sdconecta.testebackend.enums.AuthorizationStatus.*;
+import static br.sdconecta.testebackend.enums.ProfileType.ADMIN;
+import static br.sdconecta.testebackend.enums.ProfileType.NORMAL;
 import static br.sdconecta.testebackend.util.Constants.*;
 import static br.sdconecta.testebackend.util.Constants.PAGE_SIZE;
 import static java.util.Objects.*;
@@ -47,7 +46,7 @@ public class UserService {
     private CrmService crmService;
 
     @Autowired
-    private TokenService tokenService;
+    private UserTokenService userTokenService;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -55,13 +54,25 @@ public class UserService {
 
     public ResponseEntity<UserOutDto> persist(UserInDto dto, Long userId) {
         validateAdminStatus(userId);
-
         validateEmailExists(dto.getEmail());
         User entityNew = modelMapper.map(dto, User.class);
 
         entityNew.setPassword(sha256Hex(dto.getPassword()));
         entityNew.setCrms(crmService.convertDtoListToEntityList(dto.getCrms(), entityNew));
         entityNew.setProfileType(NORMAL);
+        entityNew.setAuthorizationStatus(WAITING_FOR_AUTHORIZATION);
+
+        repository.save(entityNew);
+        return ResponseEntity.status(CREATED).body(modelMapper.map(entityNew, UserOutDto.class));
+    }
+
+    public ResponseEntity<UserOutDto> persistAdmin(UserInDto dto) {
+        validateEmailExists(dto.getEmail());
+        User entityNew = modelMapper.map(dto, User.class);
+
+        entityNew.setPassword(sha256Hex(dto.getPassword()));
+        entityNew.setCrms(crmService.convertDtoListToEntityList(dto.getCrms(), entityNew));
+        entityNew.setProfileType(ADMIN);
         entityNew.setAuthorizationStatus(WAITING_FOR_AUTHORIZATION);
 
         repository.save(entityNew);
@@ -138,11 +149,11 @@ public class UserService {
             throw new NotFoundException(Constants.WRONG_EMAIL_PASSWORD);
         }
 
-        if (sha256Hex(dto.getPassword()).equals(user.get().getPassword()) && Boolean.TRUE.equals(tokenService
+        if (sha256Hex(dto.getPassword()).equals(user.get().getPassword()) && Boolean.TRUE.equals(userTokenService
                 .validateBearerToken(authorization))) {
 
-            user.get().setToken(tokenService.getCompanyToken(authorization, user.get()));
-            user.get().setAuthorizationStatus(user.get().getAuthorizationStatus());
+            user.get().setToken(userTokenService.getCompanyToken(authorization, user.get()));
+            user.get().setAuthorizationStatus(user.get().getToken().getAuthorizationStatus());
             repository.save(user.get());
         } else {
             throw new NotFoundException(Constants.WRONG_EMAIL_PASSWORD);

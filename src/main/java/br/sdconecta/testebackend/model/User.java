@@ -1,5 +1,7 @@
 package br.sdconecta.testebackend.model;
 
+import br.sdconecta.testebackend.enums.AuthorizationStatus;
+import br.sdconecta.testebackend.enums.ProfileType;
 import lombok.*;
 
 import javax.persistence.*;

@@ -1,4 +1,4 @@
-package br.sdconecta.testebackend.model;
+package br.sdconecta.testebackend.enums;
 
 import lombok.Getter;
 

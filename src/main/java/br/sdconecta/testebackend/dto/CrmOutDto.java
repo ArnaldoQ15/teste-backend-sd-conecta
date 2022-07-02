@@ -1,6 +1,6 @@
 package br.sdconecta.testebackend.dto;
 
-import br.sdconecta.testebackend.model.FederativeUnit;
+import br.sdconecta.testebackend.enums.FederativeUnit;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

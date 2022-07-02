@@ -1,5 +1,6 @@
 package br.sdconecta.testebackend.model;
 
+import br.sdconecta.testebackend.enums.AuthorizationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

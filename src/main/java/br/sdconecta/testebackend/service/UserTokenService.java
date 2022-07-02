@@ -4,7 +4,7 @@ import br.sdconecta.testebackend.dto.TokenRequestDto;
 import br.sdconecta.testebackend.dto.UserTokenDto;
 import br.sdconecta.testebackend.exception.BadRequestException;
 import br.sdconecta.testebackend.exception.UnauthorizedException;
-import br.sdconecta.testebackend.model.AuthorizationStatus;
+import br.sdconecta.testebackend.enums.AuthorizationStatus;
 import br.sdconecta.testebackend.model.User;
 import br.sdconecta.testebackend.model.UserToken;
 import br.sdconecta.testebackend.repository.UserTokenRepository;
@@ -32,7 +32,7 @@ import static java.util.Objects.isNull;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Service
-public class TokenService {
+public class UserTokenService {
 
     @Autowired
     private UserTokenRepository repository;
@@ -60,19 +60,20 @@ public class TokenService {
         TokenRequestDto tokenRequestDto = modelMapper.map(user, TokenRequestDto.class);
 
         Optional<UserToken> userToken = repository.findByEmail(user.getEmail());
-        if (userToken.isPresent()) {
+        if (userToken.isPresent())
             return validateExpirationToken(authorization, userToken.get(), tokenRequestDto);
-        }
 
-        String companyTokenBody = generateTokenCompany(authorization, tokenRequestDto);
-        UserTokenDto tokenDto = createTokenDto(companyTokenBody);
-
-        return modelMapper.map(tokenDto, UserToken.class);
+        return modelMapper.map(createTokenDto(generateTokenCompany(authorization, tokenRequestDto)), UserToken.class);
     }
 
     private UserTokenDto createTokenDto(String companyTokenBody) {
-        if (isNull(companyTokenBody) || companyTokenBody.split("\"access_token\":")[1].split(",")[0].equals("null"))
-            throw new UnauthorizedException(INVALID_TOKEN);
+        if (isNull(companyTokenBody))
+            throw new UnauthorizedException(OFFLINE_SYSTEM_SD_CONECTA);
+
+        if (companyTokenBody.split("\"access_token\":")[1].split(",")[0].equals("null"))
+            return UserTokenDto.builder()
+                    .authorizationStatus(AuthorizationStatus.valueOf(companyTokenBody.split("\"authorization_status\":\"")[1].split("\"}")[0]))
+                    .build();
 
         return UserTokenDto.builder()
                 .accessToken(companyTokenBody.split("\"access_token\":\"")[1].split("\",")[0])

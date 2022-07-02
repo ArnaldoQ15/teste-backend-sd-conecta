@@ -1,6 +1,6 @@
 package br.sdconecta.testebackend.dto;
 
-import br.sdconecta.testebackend.model.ProfileType;
+import br.sdconecta.testebackend.enums.ProfileType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

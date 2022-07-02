@@ -1,12 +1,11 @@
 package br.sdconecta.testebackend.dto;
 
-import br.sdconecta.testebackend.model.AuthorizationStatus;
+import br.sdconecta.testebackend.enums.AuthorizationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 
 @Data
