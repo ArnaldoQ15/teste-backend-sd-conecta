@@ -12,8 +12,11 @@ import lombok.NoArgsConstructor;
 public class ParameterFind {
 
     private Integer page;
+
     private Integer size;
+
     private String name;
+
     private String specialty;
 
 }
