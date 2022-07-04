@@ -12,7 +12,6 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    @Query(value = "SELECT u FROM User u WHERE LOWER(u.email) LIKE :email")
     Boolean existsByEmail (String email);
 
     @Query(value = "SELECT u FROM User u WHERE LOWER(u.name) LIKE %:name%")
