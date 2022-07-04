@@ -15,8 +15,11 @@ import java.time.OffsetDateTime;
 public class UserTokenDto {
 
     private String accessToken;
+
     private String refreshToken;
+
     private AuthorizationStatus authorizationStatus;
+
     private OffsetDateTime expiration;
 
 }

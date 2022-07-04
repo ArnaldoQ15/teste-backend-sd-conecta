@@ -15,12 +15,19 @@ import java.util.List;
 public class UserOutDto {
 
     private Long userId;
+
     private String name;
+
     private String surname;
+
     private String email;
+
     private String mobilePhone;
+
     private List<CrmOutDto> crms;
+
     private AuthorizationStatus authorizationStatus;
+
     private String profileType;
 
 }
