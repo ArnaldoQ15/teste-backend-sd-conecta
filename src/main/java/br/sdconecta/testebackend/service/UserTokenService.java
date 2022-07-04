@@ -1,10 +1,10 @@
 package br.sdconecta.testebackend.service;
 
+import br.sdconecta.testebackend.dto.TokenCompany;
 import br.sdconecta.testebackend.dto.TokenRequestDto;
 import br.sdconecta.testebackend.dto.UserTokenDto;
-import br.sdconecta.testebackend.exception.BadRequestException;
-import br.sdconecta.testebackend.exception.UnauthorizedException;
 import br.sdconecta.testebackend.enums.AuthorizationStatus;
+import br.sdconecta.testebackend.exception.UnauthorizedException;
 import br.sdconecta.testebackend.model.User;
 import br.sdconecta.testebackend.model.UserToken;
 import br.sdconecta.testebackend.repository.UserTokenRepository;
@@ -17,6 +17,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.OffsetDateTime;
@@ -49,49 +50,45 @@ public class UserTokenService {
         return new String(base64Url.decode(splitString[1]));
     }
 
-    public Boolean validateBearerToken(String token) {
-        if (!token.startsWith(BEARER_TOKEN)) {
-            throw new BadRequestException(INVALID_TOKEN);
-        }
-        return true;
-    }
-
     public UserToken getCompanyToken(String authorization, User user) {
         TokenRequestDto tokenRequestDto = modelMapper.map(user, TokenRequestDto.class);
 
-        Optional<UserToken> userToken = repository.findByEmail(user.getEmail());
+        Optional<UserToken> userToken = repository.findByEmail(tokenRequestDto.getEmail());
         if (userToken.isPresent())
             return validateExpirationToken(authorization, userToken.get(), tokenRequestDto);
 
-        return modelMapper.map(createTokenDto(generateTokenCompany(authorization, tokenRequestDto)), UserToken.class);
+        TokenCompany tokenCompany = generateTokenCompany(authorization, tokenRequestDto);
+        UserTokenDto tokenDto = createTokenDto(tokenCompany);
+        return modelMapper.map(tokenDto, UserToken.class);
     }
 
-    private UserTokenDto createTokenDto(String companyTokenBody) {
-        if (isNull(companyTokenBody))
-            throw new UnauthorizedException(OFFLINE_SYSTEM_SD_CONECTA);
-
-        if (companyTokenBody.split("\"access_token\":")[1].split(",")[0].equals("null"))
-            return UserTokenDto.builder()
-                    .authorizationStatus(AuthorizationStatus.valueOf(companyTokenBody.split("\"authorization_status\":\"")[1].split("\"}")[0]))
-                    .build();
+    public UserTokenDto createTokenDto(TokenCompany companyTokenBody) {
+        if (isNull(companyTokenBody.getAccessToken()))
+            return UserTokenDto.builder().authorizationStatus(AuthorizationStatus.valueOf(companyTokenBody.getAuthorizationStatus())).build();
 
         return UserTokenDto.builder()
-                .accessToken(companyTokenBody.split("\"access_token\":\"")[1].split("\",")[0])
-                .refreshToken(companyTokenBody.split("\"refresh_token\":\"")[1].split("\",")[0])
-                .expiration(generateExpirationToken(companyTokenBody.split("\"access_token\":\"")[1].split("\",")[0]))
-                .authorizationStatus(AuthorizationStatus.valueOf(companyTokenBody.split("\"authorization_status\":\"")[1].split("\"}")[0]))
+                .accessToken(companyTokenBody.getAccessToken())
+                .refreshToken(companyTokenBody.getRefreshToken())
+                .authorizationStatus(AuthorizationStatus.valueOf(companyTokenBody.getAuthorizationStatus()))
+                .expiration(generateExpirationToken(companyTokenBody.getAccessToken()))
                 .build();
     }
 
-    private String generateTokenCompany(String authorization, TokenRequestDto userTokenRequest) {
+    public TokenCompany generateTokenCompany(String authorization, TokenRequestDto requestDto) {
         authorization = authorization.replace(BEARER_TOKEN, "");
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(APPLICATION_JSON);
         headers.setAccept(Collections.singletonList(APPLICATION_JSON));
         headers.setBearerAuth(authorization);
-        HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(getStringObjectMap(userTokenRequest), headers);
-        ResponseEntity<String> response = restTemplate.postForEntity(clientUrl, httpEntity, String.class);
+        HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(getStringObjectMap(requestDto), headers);
+        ResponseEntity<TokenCompany> response;
+
+        try {
+            response = restTemplate.postForEntity(clientUrl, httpEntity, TokenCompany.class);
+        } catch (HttpClientErrorException ex) {
+            throw new UnauthorizedException(INVALID_TOKEN);
+        }
 
         if (isNull(response.getBody()) || response.getStatusCodeValue() != 200)
             throw new UnauthorizedException(UNAUTHORIZED_TOKEN);
@@ -99,7 +96,7 @@ public class UserTokenService {
         return response.getBody();
     }
 
-    private UserToken validateExpirationToken(String authorization, UserToken userToken, TokenRequestDto tokenRequestDto) {
+    public UserToken validateExpirationToken(String authorization, UserToken userToken, TokenRequestDto tokenRequestDto) {
         if (userToken.getExpiration().isBefore(now())){
             generateTokenCompany(authorization, tokenRequestDto);
             UserTokenDto tokenDto = createTokenDto(generateTokenCompany(authorization, tokenRequestDto));
@@ -112,7 +109,7 @@ public class UserTokenService {
         return userToken;
     }
 
-    private Map<String, Object> getStringObjectMap(TokenRequestDto dto) {
+    public Map<String, Object> getStringObjectMap(TokenRequestDto dto) {
         Map<String, Object> map = new HashMap<>();
         map.put("email", dto.getEmail());
         map.put("name", dto.getName());
@@ -123,7 +120,6 @@ public class UserTokenService {
     }
 
     public OffsetDateTime generateExpirationToken(String token) {
-        token = token.replace("Bearer ", "");
         String expiration = decodeToken(token);
         long segundos = (parseLong(expiration.split("\"exp\":")[1].split(",")[0]) - parseLong(expiration.split("\"iat\":")[1].split(",")[0]));
         return now().plusSeconds(segundos);

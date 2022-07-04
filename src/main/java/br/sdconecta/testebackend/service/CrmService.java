@@ -2,13 +2,13 @@ package br.sdconecta.testebackend.service;
 
 import br.sdconecta.testebackend.dto.CrmInDto;
 import br.sdconecta.testebackend.dto.CrmOutDto;
+import br.sdconecta.testebackend.dto.CrmUpdateDto;
 import br.sdconecta.testebackend.exception.NotFoundException;
 import br.sdconecta.testebackend.model.Crm;
 import br.sdconecta.testebackend.model.User;
 import br.sdconecta.testebackend.repository.CrmRepository;
 import br.sdconecta.testebackend.util.ParameterFind;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,10 +17,14 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 
 import static br.sdconecta.testebackend.util.Constants.*;
-import static java.util.Objects.*;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 @Service
 public class CrmService {
@@ -51,21 +55,18 @@ public class CrmService {
     }
 
     public ResponseEntity<CrmOutDto> findId(Long crmId) {
-        Crm crm = findCrm(crmId);
+        Crm crm = findCrmToEntity(crmId);
         return ResponseEntity.ok(modelMapper.map(crm, CrmOutDto.class));
     }
 
-    public ResponseEntity<CrmOutDto> update(Long crmId, CrmInDto dto) {
-        Crm crm = findCrm(crmId);
-        Crm entityNew = new Crm();
-        BeanUtils.copyProperties(crm, entityNew);
+    public ResponseEntity<CrmOutDto> update(Long crmId, CrmUpdateDto dto) {
+        Crm crm = findCrmToEntity(crmId);
 
-        entityNew.setCrm(dto.getCrm());
-        entityNew.setUf(dto.getUf());
-        entityNew.setSpecialty(dto.getSpecialty());
+        crm.setCrm(isNull(dto.getCrm()) ? crm.getCrm() : dto.getCrm());
+        crm.setUf(isNull(dto.getUf()) ? crm.getUf() : dto.getUf());
+        crm.setSpecialty(isNull(dto.getSpecialty()) ? crm.getSpecialty() : dto.getSpecialty());
 
-        repository.save(entityNew);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(modelMapper.map(repository.save(crm), CrmOutDto.class));
     }
 
     public ResponseEntity<Void> delete(Long crmId) {
@@ -73,7 +74,7 @@ public class CrmService {
         return ResponseEntity.noContent().build();
     }
 
-    private Crm findCrm(Long crmId) {
+    private Crm findCrmToEntity(Long crmId) {
         Optional<Crm> crm = repository.findById(crmId);
         if (crm.isEmpty())
             throw new NotFoundException(CRM_NOT_FOUND);
