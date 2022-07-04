@@ -4,7 +4,6 @@ import br.sdconecta.testebackend.enums.FederativeUnit;
 import lombok.*;
 
 import javax.persistence.*;
-import javax.validation.constraints.Size;
 
 @Data
 @Entity
@@ -19,7 +18,6 @@ public class Crm {
     private Long crmId;
 
     @Column
-    @Size(max = 45)
     private String crm;
 
     @Column
@@ -29,7 +27,7 @@ public class Crm {
     @Column
     private String specialty;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "userId")
     @ToString.Exclude
     private User user;

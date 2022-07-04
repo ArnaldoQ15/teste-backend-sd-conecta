@@ -17,20 +17,15 @@ public class UserToken {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column
     private Long tokenId;
 
-    @Column
     private String accessToken;
 
-    @Column
     private String refreshToken;
 
-    @Column
     @Enumerated(EnumType.STRING)
     private AuthorizationStatus authorizationStatus;
 
-    @Column
     private OffsetDateTime expiration;
 
 }

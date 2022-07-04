@@ -5,8 +5,13 @@ import br.sdconecta.testebackend.enums.ProfileType;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 import java.util.ArrayList;
 import java.util.List;
+
+import static br.sdconecta.testebackend.util.Constants.EMAIL_INVALID;
+import static br.sdconecta.testebackend.util.Constants.NOT_BLANK;
 
 @Data
 @Entity
@@ -18,25 +23,22 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column
     private Long userId;
 
-    @Column
+    @NotBlank(message = NOT_BLANK)
     private String name;
 
-    @Column
     private String surname;
 
-    @Column
+    @NotBlank(message = NOT_BLANK)
     private String password;
 
-    @Column(unique = true)
+    @NotBlank(message = NOT_BLANK)
+    @Email(message = EMAIL_INVALID)
     private String email;
 
-    @Column
     private String mobilePhone;
 
-    @Column
     @Enumerated(EnumType.STRING)
     private AuthorizationStatus authorizationStatus;
 
@@ -44,7 +46,6 @@ public class User {
     @ToString.Exclude
     private List<Crm> crms = new ArrayList<>();
 
-    @Column
     @Enumerated(EnumType.STRING)
     private ProfileType profileType;
 
