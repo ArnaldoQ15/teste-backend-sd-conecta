@@ -21,10 +21,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.OffsetDateTime;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static br.sdconecta.testebackend.util.Constants.*;
 import static java.lang.Long.parseLong;
@@ -97,7 +94,7 @@ public class UserTokenService {
     }
 
     public UserToken validateExpirationToken(String authorization, UserToken userToken, TokenRequestDto tokenRequestDto) {
-        if (userToken.getExpiration().isBefore(now())){
+        if (Objects.isNull(userToken.getExpiration()) || userToken.getExpiration().isBefore(now())){
             generateTokenCompany(authorization, tokenRequestDto);
             UserTokenDto tokenDto = createTokenDto(generateTokenCompany(authorization, tokenRequestDto));
             userToken.setAccessToken(tokenDto.getAccessToken());
